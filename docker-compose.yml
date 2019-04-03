@@ -1,0 +1,15 @@
+version: '3.6'
+services:
+  ccxt-rest-NIS:
+    image: registry.nordlicht.cloud/ccxt-rest:0.0.4.NIS
+    hostname: ccxt-rest
+    ports:
+      - 3000:3000
+    networks:
+      localdocker:
+        aliases:
+          - ccxt-rest
+
+networks:
+  localdocker:
+    driver: bridge
