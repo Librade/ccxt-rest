@@ -1,4 +1,5 @@
 var express = require('express');
+var basicAuth = require('express-basic-auth');
 var logger = require('morgan');
 var ccxt = require ('ccxt');
 
@@ -7,6 +8,14 @@ var indexRouter = require('./routes/index');
 var exchangesRouter = require('./routes/exchanges');
 
 var app = express();
+
+app.use(basicAuth({ authorizer: envAuthorizer }));
+
+function envAuthorizer(username, password) {
+  var envUser = process.env.USER;
+  var envPass = process.env.PASSWORD;
+  return username === envUser && password === envPass;
+}
 
 app.use(logger('dev'));
 

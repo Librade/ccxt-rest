@@ -26,6 +26,8 @@ COPY --from=builder /usr/src/ccxt-rest /usr/src/ccxt-rest
 RUN ln -s /usr/src/ccxt-rest/bin/www /usr/local/bin/ccxt-rest
 
 ENV PORT 3000
+ENV USER "user"
+ENV PASSWORD "password"
 
 EXPOSE 3000
 
