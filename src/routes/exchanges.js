@@ -1,7 +1,7 @@
 var ccxt = require ('ccxt')
-  , CircularJSON = require('circular-json')
-  , db = require('./../db')
-  , express = require('express');
+    , CircularJSON = require('circular-json')
+    , db = require('./../db')
+    , express = require('express');
 
 module.exports =  function(app) {
   var router = express.Router();
@@ -27,7 +27,7 @@ module.exports =  function(app) {
 
     var exchange = new ccxt[exchangeName](reqBody);
     db.saveExchange(exchangeName, exchange);
-    
+
     res.send(CircularJSON.stringify(exchange));
   });
 
@@ -40,7 +40,7 @@ module.exports =  function(app) {
     } else {
       res.sendStatus(404);
     }
-    
+
   });
 
   router.delete('/:exchangeName/:exchangeId', function(req, res, next) {
@@ -48,7 +48,7 @@ module.exports =  function(app) {
     var exchangeId = req.params.exchangeId
 
     var exchange = db.deleteExchange(exchangeName, exchangeId);
-    
+
     if (exchange) {
       res.send(CircularJSON.stringify(exchange));
     } else {
@@ -61,7 +61,7 @@ module.exports =  function(app) {
     var exchangeId = req.params.exchangeId
     var methodName = req.params.methodName
     var reqBody = req.body;
-    
+
     var exchange = db.getExchange(exchangeName, exchangeId);
 
     if (!exchange) {
@@ -69,7 +69,20 @@ module.exports =  function(app) {
       return;
     }
 
-    var response = await exchange[methodName].apply(exchange, reqBody);
-    res.send(CircularJSON.stringify(response));
+    try {
+      var response = await exchange[methodName].apply(exchange, reqBody);
+      res.send(CircularJSON.stringify(response));
+    } catch (e) {
+      // if the exception is thrown, it is "caught" and can be handled here
+      // the handling reaction depends on the type of the exception
+      // and on the purpose or business logic of your application
+      var errorObj = {
+        name: e.name,
+        type: e.constructor.name,
+        message: e.message,
+        isRecoverable: (e instanceof ccxt.NetworkError)
+      };
+      res.status(500).send(CircularJSON.stringify(errorObj));
+    }
   }));
 }
