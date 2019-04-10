@@ -1,5 +1,5 @@
 {
-  "name": "ccxt-rest",
+  "name": "ccxt-rest-nis",
   "version": "0.1.0",
   "scripts": {
     "start": "node ./bin/www",
@@ -7,7 +7,7 @@
     "test:watch": "npm run test -- --watch"
   },
   "dependencies": {
-    "ccxt": "1.18.437",
+    "ccxt": "1.18.456",
     "circular-json": "0.5.5",
     "debug": "2.6.9",
     "express": "4.16.3",
