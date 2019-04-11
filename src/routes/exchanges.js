@@ -1,3 +1,5 @@
+'use strict';
+
 var ccxt = require ('ccxt')
     , CircularJSON = require('circular-json')
     , db = require('./../db')
@@ -56,6 +58,15 @@ module.exports =  function(app) {
     }
   });
 
+  function createErrorObject(error) {
+    return {
+      name: error.name,
+      type: error.constructor.name,
+      message: error.message,
+      isRecoverable: (error instanceof ccxt.NetworkError)
+    };
+  }
+
   router.post('/:exchangeName/:exchangeId/:methodName', wrap(async function(req, res) {
     var exchangeName = req.params.exchangeName;
     var exchangeId = req.params.exchangeId
@@ -76,13 +87,34 @@ module.exports =  function(app) {
       // if the exception is thrown, it is "caught" and can be handled here
       // the handling reaction depends on the type of the exception
       // and on the purpose or business logic of your application
-      var errorObj = {
-        name: e.name,
-        type: e.constructor.name,
-        message: e.message,
-        isRecoverable: (e instanceof ccxt.NetworkError)
-      };
-      res.status(500).send(CircularJSON.stringify(errorObj));
+      res.status(500).send(CircularJSON.stringify(createErrorObject(e)));
     }
   }));
-}
+
+  router.post('/:exchangeName/:exchangeId/property/:exchangePropertyName', function(req, res, next) {
+    const exchangeName = req.params.exchangeName;
+    const exchangeId = req.params.exchangeId
+    const exchangePropertyName = req.params.exchangePropertyName;
+    const reqBody = req.body;
+
+    const exchange = db.getExchange(exchangeName, exchangeId);
+
+    if (!exchange) {
+      res.sendStatus(404);
+      return;
+    }
+
+    try {
+      if (reqBody instanceof Array && reqBody.length > 0) {
+        res.send(CircularJSON.stringify((exchange[exchangePropertyName])[reqBody[0]]));
+      } else {
+        res.send(CircularJSON.stringify(exchange[exchangePropertyName]));
+      }
+    } catch (e) {
+      // if the exception is thrown, it is "caught" and can be handled here
+      // the handling reaction depends on the type of the exception
+      // and on the purpose or business logic of your application
+      res.status(500).send(CircularJSON.stringify(createErrorObject(e)));
+    }
+  });
+};
