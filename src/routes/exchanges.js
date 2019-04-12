@@ -72,6 +72,14 @@ module.exports =  function(app) {
     var exchangeId = req.params.exchangeId
     var methodName = req.params.methodName
     var reqBody = req.body;
+    const undefinedValuePlaceholder = "__undefined__";
+    if (reqBody && reqBody.length > 0) {
+      for (let i = 0; i < reqBody.length; i++) {
+        if (reqBody[i] === undefinedValuePlaceholder) {
+          reqBody[i] = undefined;
+        }
+      }
+    }
 
     var exchange = db.getExchange(exchangeName, exchangeId);
 
