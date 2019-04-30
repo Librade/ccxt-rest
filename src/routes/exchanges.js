@@ -26,6 +26,17 @@ module.exports =  function(app) {
   router.post('/:exchangeName', function(req, res, next) {
     var reqBody = req.body;
     var exchangeName = req.params.exchangeName;
+    const nonce = req.query.nonce;
+    if (nonce) {
+      switch (nonce) {
+        case "milliseconds":
+          reqBody.nonce = function () { return this.milliseconds() };
+          break;
+        case "microseconds":
+          reqBody.nonce = function () { return this.microseconds() };
+          break;
+      }
+    }
 
     var exchange = new ccxt[exchangeName](reqBody);
     db.saveExchange(exchangeName, exchange);
