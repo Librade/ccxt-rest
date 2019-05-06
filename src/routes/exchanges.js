@@ -3,7 +3,8 @@
 var ccxt = require ('ccxt')
     , CircularJSON = require('circular-json')
     , db = require('./../db')
-    , express = require('express');
+    , express = require('express')
+    , packageJsonFile = require('./../../package.json');
 
 module.exports =  function(app) {
   var router = express.Router();
@@ -15,6 +16,10 @@ module.exports =  function(app) {
 
   router.get('/', function(req, res, next) {
     res.send(CircularJSON.stringify(ccxt.exchanges));
+  });
+
+  router.get('/version', function(req, res, next) {
+    res.send(CircularJSON.stringify(packageJsonFile.version));
   });
 
   router.get('/:exchangeName', function(req, res, next) {
