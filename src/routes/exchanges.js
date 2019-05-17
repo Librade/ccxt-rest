@@ -54,16 +54,19 @@ module.exports =  function(app) {
     var exchangeId = req.params.exchangeId
     const checkOnly = req.query.checkOnly;
     var exchange = db.getExchange(exchangeName, exchangeId);
-    if (exchange) {
-      if (checkOnly === "true") {
+    if (checkOnly === "true") {
+      if (exchange) {
         res.sendStatus(200);
       } else {
-        res.send(CircularJSON.stringify(exchange));
+        res.sendStatus(204); // No Content
       }
     } else {
-      res.sendStatus(404);
+      if (exchange) {
+        res.send(CircularJSON.stringify(exchange));
+      } else {
+        res.sendStatus(404);
+      }
     }
-
   });
 
   router.delete('/:exchangeName/:exchangeId', function(req, res, next) {
