@@ -47,9 +47,14 @@ module.exports =  function(app) {
   router.get('/:exchangeName/:exchangeId', function(req, res, next) {
     var exchangeName = req.params.exchangeName;
     var exchangeId = req.params.exchangeId
+    const checkOnly = req.query.checkOnly;
     var exchange = db.getExchange(exchangeName, exchangeId);
     if (exchange) {
-      res.send(CircularJSON.stringify(exchange));
+      if (checkOnly === "true") {
+        res.sendStatus(200);
+      } else {
+        res.send(CircularJSON.stringify(exchange));
+      }
     } else {
       res.sendStatus(404);
     }
