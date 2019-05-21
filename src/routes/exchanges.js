@@ -91,6 +91,13 @@ module.exports =  function(app) {
     };
   }
 
+  function getCurrentMinuteMillis() {
+    return Math.floor(Date.now() / 60000) * 60000;
+  }
+
+  let requestCount = 0;
+  let startOfCurrentLimitInterval = getCurrentMinuteMillis();
+
   router.post('/:exchangeName/:exchangeId/:methodName', wrap(async function(req, res) {
     var exchangeName = req.params.exchangeName;
     var exchangeId = req.params.exchangeId
@@ -113,8 +120,24 @@ module.exports =  function(app) {
     }
 
     try {
-      var response = await exchange[methodName].apply(exchange, reqBody);
-      res.send(CircularJSON.stringify(response));
+      //var response = await exchange[methodName].apply(exchange, reqBody);
+      let currentMinute = getCurrentMinuteMillis();
+      if (currentMinute > startOfCurrentLimitInterval) {
+        startOfCurrentLimitInterval = currentMinute;
+        requestCount = 0;
+      }
+      requestCount++;
+      if (requestCount <= 20) {
+        let response = {
+          id: requestCount
+        };
+        res.send(CircularJSON.stringify(response));
+      } else {
+        throw new ccxt.DDoSProtection("Exchange rate exceeded");
+      }
+
+
+      //res.send(CircularJSON.stringify(response));
     } catch (e) {
       // if the exception is thrown, it is "caught" and can be handled here
       // the handling reaction depends on the type of the exception
